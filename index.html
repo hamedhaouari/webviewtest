@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .result-box {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+        }
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .value {
+            color: #666;
+            word-break: break-all;
+        }
+        .true {
+            color: #2ecc71;
+        }
+        .false {
+            color: #e74c3c;
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WebView Detector</h1>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function detectWebView() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            // Check for Android WebView
+            const isAndroidWebView = (userAgent.includes('wv') || 
+                                    userAgent.includes('chrome-mobile') && navigator.vendor.includes('Google Inc.'));
+            
+            // Check for iOS WebView
+            const isIOSWebView = (/(iphone|ipod|ipad).*applewebkit(?!.*safari)/i.test(userAgent) ||
+                                (userAgent.includes('iphone') && !userAgent.includes('safari')) ||
+                                window.webkit && window.webkit.messageHandlers);
+            
+            // Check specifically for Chrome WebView
+            const isChromeWebView = userAgent.includes('chrome') && 
+                                  (userAgent.includes('webview') || 
+                                   userAgent.includes('wv'));
+
+            return {
+                userAgent: userAgent,
+                isAndroidWebView: isAndroidWebView,
+                isIOSWebView: isIOSWebView,
+                isChromeWebView: isChromeWebView,
+                isStandardBrowser: !isAndroidWebView && !isIOSWebView,
+                platform: {
+                    isIOS: /iphone|ipad|ipod/i.test(userAgent),
+                    isAndroid: /android/i.test(userAgent)
+                },
+                screenSize: {
+                    width: window.screen.width,
+                    height: window.screen.height
+                },
+                viewport: {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                },
+                pixelRatio: window.devicePixelRatio
+            };
+        }
+
+        function displayResults() {
+            const results = detectWebView();
+            const resultsDiv = document.getElementById('results');
+            
+            const items = [
+                { label: 'User Agent', value: results.userAgent },
+                { label: 'Android WebView', value: results.isAndroidWebView },
+                { label: 'iOS WebView', value: results.isIOSWebView },
+                { label: 'Chrome WebView', value: results.isChromeWebView },
+                { label: 'Standard Browser', value: results.isStandardBrowser },
+                { label: 'iOS Device', value: results.platform.isIOS },
+                { label: 'Android Device', value: results.platform.isAndroid },
+                { label: 'Screen Size', value: `${results.screenSize.width}x${results.screenSize.height}` },
+                { label: 'Viewport Size', value: `${results.viewport.width}x${results.viewport.height}` },
+                { label: 'Pixel Ratio', value: results.pixelRatio }
+            ];
+
+            resultsDiv.innerHTML = items.map(item => `
+                <div class="result-box">
+                    <div class="label">${item.label}:</div>
+                    <div class="value ${typeof item.value === 'boolean' ? (item.value ? 'true' : 'false') : ''}">${item.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // Initial display
+        displayResults();
+
+        // Update on resize
+        window.addEventListener('resize', displayResults);
+    </script>
+</body>
+</html>
