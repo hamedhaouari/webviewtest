@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zain Bahrain Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
+
+        .phone {
+            width: 375px;
+            height: 667px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,153,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #008000, #00cc00);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon {
+            background: white;
+            color: #009900;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 0;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .quiz-content {
+            height: calc(100% - 150px);
+            overflow-y: auto;
+            padding: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .quiz-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .quiz-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .quiz-content::-webkit-scrollbar-thumb {
+            background: #009900;
+            border-radius: 4px;
+        }
+
+        .quiz-content::-webkit-scrollbar-thumb:hover {
+            background: #007700;
+        }
+
+        .messages-container {
+            min-height: 100%;
+            padding-bottom: 20px;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            max-width: 80%;
+            position: relative;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .bot-message {
+            background: #e6f2ff;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            background: #009900;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,153,0,0.2);
+        }
+
+        .option.selected {
+            background: #009900;
+            color: white;
+            animation: pulse 0.5s ease;
+        }
+
+        .option.incorrect {
+            background: #FF4444;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .spin-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .spin-wheel {
+            width: 200px;
+            height: 200px;
+            background: conic-gradient(
+                #009900 0deg 72deg, 
+                #00cc00 72deg 144deg, 
+                #4CAF50 144deg 216deg, 
+                #8BC34A 216deg 288deg, 
+                #CDDC39 288deg 360deg
+            );
+            border-radius: 50%;
+            position: relative;
+            transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transform-origin: center;
+        }
+
+        .spin-wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid red;
+            z-index: 10;
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #008000, #00cc00);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .continue-button {
+            background: #009900;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">Z</div>
+                <h2>Zain BH Quiz</h2>
+            </div>
+            <div class="progress-container">
+                <div class="progress">Question <span id="currentQuestion">1</span>/<span id="totalQuestions">5</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+            <div class="messages-container"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizContent = document.getElementById('quizContent');
+            const messagesContainer = document.querySelector('.messages-container');
+            const currentQuestionSpan = document.getElementById('currentQuestion');
+            const totalQuestionsSpan = document.getElementById('totalQuestions');
+            const progressFill = document.getElementById('progressFill');
+
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let continuedQuiz = false;
+
+            const firstSetQuestions = [
+                {
+                    question: "In which year was Zain Bahrain established?",
+                    options: ["2003", "2005", "2010", "2007"],
+                    correct: 3
+                },
+                {
+                    question: "What was Zain's previous name in Bahrain?",
+                    options: ["Batelco", "MTC", "Zain Telecom", "Viva"],
+                    correct: 1
+                },
+                {
+                    question: "What is Zain's primary brand color?",
+                    options: ["Blue", "Red", "Green", "Yellow"],
+                    correct: 2
+                },
+                {
+                    question: "Which country is Zain Group headquartered in?",
+                    options: ["UAE", "Saudi Arabia", "Kuwait", "Bahrain"],
+                    correct: 2
+                },
+                {
+                    question: "What does Zain mean in Arabic?",
+                    options: ["Success", "Growth", "Good", "Progress"],
+                    correct: 2
+                }
+            ];
+
+            const additionalQuestions = [
+                {
+                    question: "In how many countries does Zain Group operate?",
+                    options: ["7", "8", "10", "12"],
+                    correct: 2
+                },
+                {
+                    question: "What type of telecommunications services does Zain primarily provide?",
+                    options: ["Landline", "Mobile", "Satellite", "Internet Only"],
+                    correct: 1
+                },
+                {
+                    question: "When did Zain Group first launch 5G services?",
+                    options: ["2018", "2019", "2020", "2021"],
+                    correct: 2
+                },
+                {
+                    question: "What percentage of mobile market share does Zain have in Bahrain?",
+                    options: ["Around 40%", "Around 50%", "Around 60%", "Around 70%"],
+                    correct: 1
+                },
+                {
+                    question: "Which technology initiative has Zain been known for in recent years?",
+                    options: ["AI Development", "Blockchain", "Internet of Things", "Space Communications"],
+                    correct: 2
+                }
+            ];
+
+            const finalQuestions = [
+                {
+                    question: "In which year did Zain launch its first digital services platform?",
+                    options: ["2015", "2016", "2017", "2018"],
+                    correct: 2
+                },
+                {
+                    question: "What is Zain's approach to corporate social responsibility?",
+                    options: ["No focus", "Limited involvement", "Strong community engagement", "Purely profit-driven"],
+                    correct: 2
+                },
+                {
+                    question: "Which international standard has Zain Bahrain been recognized for in sustainability?",
+                    options: ["ISO 9001", "ISO 14001", "ISO 27001", "ISO 45001"],
+                    correct: 1
+                },
+                {
+                    question: "What type of network infrastructure does Zain primarily use?",
+                    options: ["2G", "3G", "4G", "5G"],
+                    correct: 2
+                },
+                {
+                    question: "How does Zain support digital transformation in Bahrain?",
+                    options: ["No support", "Limited support", "Significant investment", "External partnerships"],
+                    correct: 2
+                }
+            ];
+
+            function addMessage(message, type = 'bot') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${type}-message`;
+                messageDiv.textContent = message;
+                messagesContainer.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    quizContent.scrollTo({
+                        top: quizContent.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }, 50);
+            }
+
+            function createContinueButton() {
+                const buttonContainer = document.createElement('div');
+                buttonContainer.innerHTML = `
+                    <div class="chat-message bot-message">
+                        You scored ${score}/50. Would you like to continue with the next 5 questions?
+                    </div>
+                    <button class="continue-button" id="continueButton">Continue Quiz</button>
+                    <button class="continue-button" id="stopButton">End Quiz</button>
+                `;
+                messagesContainer.appendChild(buttonContainer);
+
+                document.getElementById('continueButton').addEventListener('click', () => {
+                    continuedQuiz = true;
+                    buttonContainer.remove();
+                    baseQuestions = additionalQuestions;
+                    currentQuestionIndex = 0;
+                    displayQuestion();
+                });
+
+                document.getElementById('stopButton').addEventListener('click', () => {
+                    showSpinWheel();
+                });
+            }
+
+            function displayQuestion(questionIndex = currentQuestionIndex) {
+                const question = baseQuestions[questionIndex];
+                
+                // Clear previous options
+                const existingOptions = messagesContainer.querySelector('.options');
+                if (existingOptions) {
+                    existingOptions.remove();
+                }
+
+                // Display question
+                addMessage(question.question);
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                
+                question.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option';
+                    optionElement.textContent = option;
+                    optionElement.dataset.index = index;
+                    
+                    optionElement.addEventListener('click', () => handleAnswer(optionElement, question));
+                    optionsDiv.appendChild(optionElement);
+                });
+                
+                messagesContainer.appendChild(optionsDiv);
+                
+                // Update progress
+                currentQuestionSpan.textContent = questionIndex + 1;
+                totalQuestionsSpan.textContent = baseQuestions.length;
+                const progress = ((questionIndex + 1) / baseQuestions.length) * 100;
+                progressFill.style.width = `${progress}%`;
+            }
+
+            function handleAnswer(selectedOption, question) {
+                const selectedIndex = parseInt(selectedOption.dataset.index);
+                const correctIndex = question.correct;
+                const isCorrect = selectedIndex === correctIndex;
+
+                // Disable further selections
+                const options = document.querySelectorAll('.option');
+                options.forEach(opt => opt.style.pointerEvents = 'none');
+
+                // Highlight correct and incorrect answers
+                options[correctIndex].style.background = '#4CAF50';
+                
+                // Mark incorrect answer in red if selected
+                if (!isCorrect) {
+                    selectedOption.classList.add('incorrect');
+                }
+
+                // Add user's selected answer
+                addMessage(selectedOption.textContent, 'user');
+
+                // Provide feedback
+                if (isCorrect) {
+                    score += 10;
+                    addMessage('Correct! 🎉', 'bot');
+                } else {
+                    addMessage('Incorrect 😕', 'bot');
+                }
+
+                // Move to next question
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < baseQuestions.length) {
+                        displayQuestion();
+                    } else {
+                        if (!continuedQuiz) {
+                            createContinueButton();
+                        } else {
+                            showSpinWheel();
+                        }
+                    }
+                }, 1500);
+            }
+
+            function showSpinWheel() {
+                messagesContainer.innerHTML = `
+                    <div class="spin-container">
+                        <div class="chat-message bot-message">
+                            Congratulations! You've completed all questions. 
+                            Your total score is ${score}/${continuedQuiz ? 150 : 50}
+                        </div>
+                        <div class="spin-wheel" id="spinWheel">
+                            <div class="spin-wheel-pointer"></div>
+                        </div>
+                        <button class="spin-button" id="spinButton">Spin the Wheel</button>
+                    </div>
+                `;
+
+                const spinWheel = document.getElementById('spinWheel');
+                const spinButton = document.getElementById('spinButton');
+
+                spinButton.addEventListener('click', () => {
+                    // Disable button after click
+                    spinButton.disabled = true;
+                    
+                    // Random spin rotation
+                    const rotation = 720 + Math.random() * 360;
+                    spinWheel.style.transform = `rotate(${rotation}deg)`;
+
+                    // Determine prize after spin
+                    setTimeout(() => {
+                        const prizes = [
+                            'Free 1GB Data',
+                            '10% Discount',
+                            'Zain Merchandise',
+                            'Free Calling Minutes',
+                            'Surprise Gift'
+                        ];
+                        const prizeIndex = Math.floor((rotation % 360) / 72);
+                        
+                        const resultMessage = `
+                            <div class="chat-message bot-message">
+                                You won: ${prizes[prizeIndex]}! 
+                                Congratulations on completing the Zain Bahrain Quiz!
+                            </div>
+                            <button class="spin-button" onclick="location.reload()">Play Again</button>
+                        `;
+                        
+                        messagesContainer.innerHTML += resultMessage;
+                    }, 5000);
+                });
+            }
+
+            // Start the quiz
+            let baseQuestions = firstSetQuestions;
+            addMessage('Welcome to Zain Bahrain Quiz! 🇧🇭');
+            displayQuestion();
+        });
+    </script>
+</body>
+</html>
